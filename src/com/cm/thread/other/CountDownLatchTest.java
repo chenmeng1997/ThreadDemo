@@ -11,9 +11,8 @@ import java.util.concurrent.TimeUnit;
 public class CountDownLatchTest {
 
     public static void main(String[] args) throws InterruptedException {
-//        countDownLatchTest();
-        joinTest();
-
+        countDownLatchTest();
+        // joinTest();
 
     }
 
@@ -35,8 +34,8 @@ public class CountDownLatchTest {
             });
         }
 
-        for (int i = 0; i < threads.length; i++) {
-            threads[i].start();
+        for (Thread thread : threads) {
+            thread.start();
         }
         long count = countDownLatch.getCount();
         // 等待门闩放开
@@ -46,6 +45,7 @@ public class CountDownLatchTest {
         System.out.println("count:" + count + "  await:" + await);
     }
 
+    // 插队
     private static void joinTest() throws InterruptedException {
         Thread[] threads = new Thread[1000];
 
