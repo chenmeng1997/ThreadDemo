@@ -56,9 +56,9 @@ public class CountDownLatchTest {
             });
         }
 
-        for (int i = 0; i < threads.length; i++) {
-            threads[i].join();
-            threads[i].start();
+        for (Thread thread : threads) {
+            thread.join();
+            thread.start();
         }
         System.out.println(Thread.currentThread().getName());
 

@@ -1,7 +1,8 @@
 package com.cm.thread;
 
+import java.util.Scanner;
+import java.util.Stack;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author 陈萌
@@ -10,51 +11,72 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ThreadTest {
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException, TimeoutException {
-        // 创建线程1
-        Thread thread1 = new Thread(() -> {
-            System.out.println("创建线程1" + Thread.currentThread().getName());
-        });
-        thread1.start();
+    private static class Node {
+        public int data;
+        public Node left;
+        public Node right;
 
-        // 创建线程2
-        Runnable runnable = () -> System.out.println("创建线程2" + Thread.currentThread().getName());
-        Thread thread2 = new Thread(runnable);
-        thread2.start();
-
-        // 创建线程3
-        Callable<String> callable = () -> "创建线程3" + System.currentTimeMillis();
-        FutureTask<String> futureTask = new FutureTask<>(callable);
-        Thread thread3 = new Thread(futureTask);
-        thread3.start();
-        String s1 = futureTask.get(10, TimeUnit.SECONDS);
-        System.out.println(s1);
-        // 创建线程4
-        ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
-        singleThreadExecutor.execute(() -> System.out.println("创建线程4"));
-
-        Future<String> futureTask2 = singleThreadExecutor.submit(callable);
-        String s = futureTask2.get();
-        System.out.println(s);
-
-        singleThreadExecutor.shutdownNow();
-
-        ThreadLocal<String> threadLocal = new ThreadLocal<>();
-        threadLocal.set("lisi");
-        String name = threadLocal.get();
-        threadLocal.remove();
+        public Node(int data) {
+            this.data = data;
+        }
     }
 
-    public static void threadPoolExecutorTest() {
-        new ThreadPoolExecutor(
-                2,
-                10,
-                2000,
-                TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                Executors.defaultThreadFactory(),
-                new ThreadPoolExecutor.DiscardOldestPolicy()
-        );
+    public static Node[] getTwoErrNodes(Node head) {
+        Node[] errs = new Node[2];
+        if (head == null) {
+            return errs;
+        }
+        Stack<Node> stack = new Stack<>();
+        Node pre = null;
+        while (!stack.isEmpty() || head != null) {
+            if (head != null) {
+                stack.push(head);
+                head = head.left;
+            } else {
+                head = stack.pop();
+                if (pre != null && pre.data > head.data) {
+                    errs[0] = errs[0] == null ? pre : errs[0];
+                    errs[1] = head;
+                }
+                pre = head;
+                head = head.right;
+            }
+        }
+        return errs;
     }
+
+    public static int lcm(int a, int b) {
+        if (a == 0 || b == 0) {
+            return 0;
+        }
+        int max = Math.max(a, b);
+        int min = Math.min(a, b);
+        int c = 1;// 循环次数
+        int lcm = max;// 最小公约
+        while (lcm % min != 0) {
+            c++;
+            lcm = max * c;
+        }
+        return lcm;
+    }
+
+    public static void main(String[] args) {
+        Node node1 = new Node(4);
+        Node node2 = new Node(2);
+        Node node3 = new Node(5);
+        Node node4 = new Node(3);
+        Node node5 = new Node(1);
+
+        node1.left = node2;
+        node1.right = node3;
+        node2.left = node4;
+        node2.right = node5;
+
+        Node[] nodes = getTwoErrNodes(node1);
+
+        System.out.printf("[%s, %s]", nodes[0].data, nodes[1].data);
+        System.out.printf("The second node is: %d%n", nodes[1].data);
+    }
+
 
 }
